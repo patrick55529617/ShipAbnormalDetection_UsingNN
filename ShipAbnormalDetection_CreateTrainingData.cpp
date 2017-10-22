@@ -108,7 +108,7 @@ int sixteenDirection(double x,double y)
 	else if (x == 0 || y == 0) {
 		if (x == 0) {
 			if (y > 0) return 13;
-			else if (y < 0) return 15;
+			else if (y < 0) return 5;
 		}
 		else {
 			if (x > 0) return 1;

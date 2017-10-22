@@ -97,16 +97,16 @@ int main(int argc, const char** argv)
 
 	test_case9
 		[272, 43, 17, 12]
-
 */
-	i.selection = {192,77,11,11};
+
+	i.selection = { 82, 115, 12, 13 };
 	input.push_back(i);
 
 	trackObject = -1;
 
 	//讀影片開始
 
-	cap.open("D:\\testdata\\test_case6.avi");//影片抓取by路徑
+	cap.open("D:\\testdata\\test_case2.avi");//影片抓取by路徑
 
 	if (!cap.isOpened())
 	{
@@ -115,7 +115,7 @@ int main(int argc, const char** argv)
 		return -1;
 	}
 	namedWindow("CamShift Demo", 0);
-	namedWindow("mask", WINDOW_NORMAL);
+	//namedWindow("mask", WINDOW_NORMAL);
 	
 	//獲取fps 可能還有問題
 	fps = cap.get(CV_CAP_PROP_FPS);
@@ -141,8 +141,8 @@ int main(int argc, const char** argv)
 		threshold(src, gray, 128, 255, cv::THRESH_BINARY);
 		cvtColor(gray, image, cv::COLOR_GRAY2RGB);
 
-		namedWindow("gray", WINDOW_NORMAL);
-		imshow("gray", image);
+		//namedWindow("gray", WINDOW_NORMAL);
+		//imshow("gray", image);
 
 		if (!paused)
 		{
@@ -187,7 +187,7 @@ int main(int argc, const char** argv)
 					}
 				}
 				mask &= black_img;
-				imshow("mask", mask);
+				//imshow("mask", mask);
 
 				// Perform CAMShift
 				calcBackProject(&hue, 1, 0, hist, backproj, &phranges);
@@ -220,7 +220,7 @@ int main(int argc, const char** argv)
 
 							ellipse(frame, input[a].trackBox, Scalar(0, 255, 0), 1, 16);//畫橢圓
 
-							if (input[a].pt.size() > 1200) {
+							if (input[a].pt.size() > fps*30) {
 								
 								analyze(input[a].pt.size(), a);
 								for (int i = 0; i < 9; i++)
@@ -233,8 +233,7 @@ int main(int argc, const char** argv)
 									cout << angle[a][i] << " ";
 								cout << endl;
 								cout << ReadCNN(a) << endl;
-								cout << endl;
-								cout << endl;
+								cout << endl << endl;
 								//cout << ReadCNN(a) << endl;
 								
 								if (ReadCNN(a) == 1) {
@@ -346,9 +345,20 @@ int ReadCNN(int ship_ID)
 
 void analyze(int cnt,int ship_ID) // cnt: 路徑記錄幾個點
 {
-	int cut = (cnt - 1) / 10;
-	int flag = 0;
+	int cut = cnt / 10;
 	int control_ruler = 0;
+	
+	for (int i = 0; i < 10; i++) {
+		double x = 0, y = 0;
+
+		for (int j = 0; j < 5; j++) {
+			x += input[ship_ID].pt[i*cut+cut / 2 - 2 + j].x;
+			y += input[ship_ID].pt[i*cut+cut / 2 - 2 + j].y;
+		}
+		averageLocate[ship_ID][i].x = x / 5;
+		averageLocate[ship_ID][i].y = y / 5;
+	}
+	/*
 	for (int i = 0; i < 10; i++) {
 		double x = 0, y = 0;
 
@@ -359,7 +369,7 @@ void analyze(int cnt,int ship_ID) // cnt: 路徑記錄幾個點
 		}
 		averageLocate[ship_ID][i].x = x / cut;
 		averageLocate[ship_ID][i].y = y / cut;
-	}
+	}*/
 
 	for (int i = 0; i < 9; i++) {
 		double x = averageLocate[ship_ID][i + 1].x - averageLocate[ship_ID][i].x;
@@ -395,7 +405,7 @@ int sixteenDirection(double x, double y)
 	else if (x == 0 || y == 0) {
 		if (x == 0) {
 			if (y > 0) return 13;
-			else if (y < 0) return 15;
+			else if (y < 0) return 5;
 		}
 		else {
 			if (x > 0) return 1;
